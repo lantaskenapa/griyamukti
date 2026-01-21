@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manajemen Kos - Griya Mukti</title>
+  
+  <!-- Bootstrap CSS lokal -->
+  <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <img src="asset/logogriyamukti.png" alt="Logo Griya Mukti" class="img-fluid" style="max-height: 120px;">
+  </div>
+
+<!-- Tombol Tambah Penghuni & Data Riwayat Penghuni (style minimalis modern seperti contoh) -->
+<!-- Tombol Tambah Penghuni & Data Riwayat Penghuni (minimalis modern + ikon sesuai teks) -->
+<div class="d-flex justify-content-end mb-4 gap-3">
+  <!-- Tombol Tambah Penghuni -->
+  <button class="btn custom-btn add-btn" data-bs-toggle="modal" data-bs-target="#addModal">
+    <i class="bi bi-plus-circle-fill me-2"></i> Tambah Penghuni
+  </button>
+
+  <!-- Tombol Data Riwayat Penghuni -->
+  <a href="riwayat.html" class="btn custom-btn history-btn">
+    <i class="bi bi-journal-text me-2"></i> Data Riwayat Penghuni
+  </a>
+</div>
+
+<!-- Garis horizontal tipis di bawah tombol -->
+<hr class="border-secondary border-1 opacity-20 mb-4">
+
+  <!-- Radio Button Switch Lokasi -->
+<div class="text-center mb-5">
+  <div class="kos-switch btn-group" role="group">
+    <input type="radio" class="btn-check" name="kosType" id="griyaMukti" value="griyaMukti" autocomplete="off" checked>
+    <label class="btn" for="griyaMukti">Griya Mukti</label>
+
+    <input type="radio" class="btn-check" name="kosType" id="newGriyaMukti" value="newGriyaMukti" autocomplete="off">
+    <label class="btn" for="newGriyaMukti">New Griya Mukti</label>
+  </div>
+</div>
+
+
+  <!-- Accordion Daftar Kamar -->
+  <div class="accordion" id="roomAccordion">
+    <!-- Di-generate oleh JS -->
+  </div>
+
+  <!-- Riwayat Penghuni -->
+<!-- Riwayat (Ringkas + Show More) -->
+<div class="card mt-4 shadow-sm border-0 rounded-4">
+  <div class="card-header bg-white rounded-top-4 d-flex justify-content-between align-items-center">
+    <h6 class="mb-0 fw-semibold text-muted">Riwayat Terbaru</h6>
+    <button class="btn btn-sm btn-link p-0 text-primary fw-medium show-more-btn" onclick="toggleHistory()" style="display: none;">
+      Lihat Semua <i class="bi bi-chevron-down ms-1"></i>
+    </button>
+  </div>
+  <div class="card-body p-0">
+    <div id="historyList" class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+      <!-- Diisi oleh JS -->
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Modal Tambah/Edit Penghuni -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="addModalLabel">Tambah Penghuni Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addForm">
+          <input type="hidden" id="oldRoomId" value="">
+          <div class="mb-3">
+            <label class="form-label">Lokasi Kos</label>
+            <select class="form-select" id="locationSelect" required>
+              <option value="griyaMukti">Griya Mukti</option>
+              <option value="newGriyaMukti">New Griya Mukti</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nomor Kamar</label>
+            <select class="form-select" id="roomNumber" required>
+              <!-- Opsi diisi oleh JS -->
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nama Lengkap</label>
+            <input type="text" class="form-control" id="name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">No. HP / WA</label>
+            <input type="tel" class="form-control" id="phone">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Jumlah Penghuni</label>
+            <select class="form-select" id="jumlahPenghuni" required>
+              <option value="1">1 Orang</option>
+              <option value="2">2 Orang</option>
+              <option value="3">3 Orang</option>
+              <option value="4">4 Orang</option>
+              <option value="5">5 Orang</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tanggal Masuk</label>
+            <input type="date" class="form-control" id="checkIn" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Catatan (opsional)</label>
+            <textarea class="form-control" id="notes" rows="2"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 rounded-pill" id="submitBtn">Simpan Penghuni</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS lokal -->
+<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Firebase SDK -->
+<script type="module" src="script.js"></script>
+
+<!-- Footer -->
+<footer class="mt-5 py-4 bg-light text-center border-top border-secondary-subtle">
+  <div class="container">
+    <p class="mb-1 text-muted small fw-light">
+      Dibuat oleh anak bungsu
+    </p>
+    <p class="mb-0 text-muted small fw-light">
+      untuk papah ❤️
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

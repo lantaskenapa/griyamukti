@@ -1,0 +1,388 @@
+/* ===== Base ===== */
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  background-color: #f8f9ff;          /* Biru-abu pastel lembut */
+  color: #2d3748;
+}
+
+/* ===== Typography ===== */
+h1 {
+  font-weight: 400;
+  font-size: 2.25rem;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+}
+
+/* ===== Accordion ===== */
+.accordion-item {
+  border: none !important;
+  margin-bottom: 1rem;
+  border-radius: 16px !important;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  background: white;
+}
+
+.accordion-button {
+  font-weight: 500;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  border: none !important;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px !important;
+  transition: all 0.3s ease;
+}
+
+.accordion-button:focus {
+  box-shadow: none !important;
+}
+
+.accordion-button:not(.collapsed) {
+  background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 100%) !important; /* Pastel indigo-purple */
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(165, 180, 252, 0.3) !important;
+}
+
+.accordion-button::after {
+  filter: brightness(0.8); /* Agar ikon lebih lembut */
+}
+
+.accordion-body {
+  background-color: #ffffff;
+  border-top: none;
+  padding: 1.5rem 2rem;
+  border-radius: 0 0 16px 16px;
+}
+
+/* ===== Card History ===== */
+.card {
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  background: white;
+}
+
+.card-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+/* ===== Button Primary ===== */
+.btn-primary {
+  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 1.75rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+/* ===== List Group ===== */
+.list-group-item {
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 14px 0;
+  color: #4b5563;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+/* ===== Badge/Status ===== */
+.badge {
+  font-weight: 600;
+  padding: 0.5em 1em;
+  border-radius: 999px;
+}
+
+.bg-success { background-color: #86efac !important; color: #065f46; }
+.bg-danger  { background-color: #fca5a5 !important; color: #991b1b; }
+
+/* ===== Rounded ===== */
+.rounded-4 { border-radius: 1.5rem !important; }
+.rounded-pill { border-radius: 999px !important; }
+
+/* ===== Text muted ===== */
+.text-muted { color: #94a3b8 !important; }
+
+/* Style tombol minimalis modern */
+.add-btn,
+.history-btn {
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* shadow tipis */
+}
+
+.add-btn {
+  background-color: #0d6efd;
+}
+
+.history-btn {
+  background-color: #198754;
+}
+
+/* Hover effect minimalis */
+.add-btn:hover,
+.history-btn:hover {
+  transform: scale(1.05); /* sedikit membesar */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  opacity: 0.95; /* sedikit lebih gelap */
+}
+
+/* Ikon lebih rapi */
+.add-btn i,
+.history-btn i {
+  font-size: 1.1rem;
+}
+
+/* Style tombol minimalis modern (capsule shape) */
+.custom-btn {
+  background-color: #ffffff;
+  color: #333333;
+  border: none;
+  border-radius: 9999px; /* Sangat bulat */
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+  cursor: pointer;
+}
+
+/* Hover effect */
+.custom-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  background-color: #f8f9fa;
+}
+
+/* Warna khusus */
+.add-btn {
+  background-color: #e3f2fd;
+  color: #0d6efd;
+}
+
+.add-btn:hover {
+  background-color: #bbdefb;
+  color: #0b5ed7;
+}
+
+.history-btn {
+  background-color: #e8f5e9;
+  color: #198754;
+}
+
+.history-btn:hover {
+  background-color: #c8e6c9;
+  color: #157347;
+}
+
+/* Ikon */
+.custom-btn i {
+  font-size: 1.2rem;
+}
+
+.kos-switch {
+  display: inline-flex;
+  gap: 2rem;
+}
+
+.kos-switch .btn {
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 10px 0;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.kos-switch .btn:hover {
+  color: #0d6efd;
+}
+
+.kos-switch .btn-check:checked + .btn {
+  color: #0d6efd;
+  font-weight: 600;
+}
+
+.kos-switch .btn-check:checked + .btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 60%;
+  height: 3px;
+  background-color: #0d6efd;
+  transform: translateX(-50%);
+  border-radius: 3px;
+}
+
+/* Style Riwayat Ringkas */
+#historyList {
+  transition: max-height 0.3s ease;
+}
+
+#historyList.collapsed {
+  max-height: 300px;
+}
+
+#historyList.expanded {
+  max-height: 600px;
+}
+
+.show-more-btn {
+  font-size: 0.875rem;
+}
+
+.show-more-btn:hover {
+  text-decoration: none !important;
+  opacity: 0.8;
+}
+
+.list-group-item {
+  font-size: 0.9rem;
+  padding: 12px 16px;
+  border-left: none;
+  border-right: none;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+/* Scrollbar custom untuk riwayat */
+#historyList::-webkit-scrollbar {
+  width: 4px;
+}
+
+#historyList::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 2px;
+}
+
+#historyList::-webkit-scrollbar-thumb {
+  background: #dee2e6;
+  border-radius: 2px;
+}
+
+#historyList::-webkit-scrollbar-thumb:hover {
+  background: #adb5bd;
+}
+
+footer {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+footer p {
+  font-size: 0.875rem;
+  line-height: 1.0;
+  margin: 0;
+}
+
+/* Style Tabel Penghuni Aktif */
+.custom-table thead th {
+  background-color: #0d6efd;
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  padding: 14px 16px;
+  border-bottom: none;
+}
+
+.custom-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.custom-table tbody tr:hover {
+  background-color: rgba(13, 110, 253, 0.08);
+  transform: translateY(-1px);
+}
+
+.custom-table td {
+  vertical-align: middle;
+  padding: 14px 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.custom-table td:first-child {
+  font-weight: 500;
+  color: #0d6efd;
+}
+
+/* Tombol Kembali */
+.btn-outline-secondary {
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+/* Tombol Kembali - Modern & Minimalis */
+.btn-back {
+  background-color: #ffffff;
+  border: 2px solid #dee2e6;
+  color: #495057;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 10px 24px;
+}
+
+.btn-back:hover {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(13, 110, 253, 0.25);
+}
+
+.btn-back:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+}
+
+/* Ikon lebih rapi */
+.btn-back i {
+  transition: transform 0.3s ease;
+}
+
+.btn-back:hover i {
+  transform: translateX(-4px); /* Efek geser ikon ke kiri saat hover */
+}
+
+/* Responsif mobile */
+@media (max-width: 576px) {
+  .d-flex.gap-3 {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .custom-btn {
+    width: 100%;
+  }
+}

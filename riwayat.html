@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data Riwayat Penghuni - Griya Mukti</title>
+  
+  <!-- Bootstrap CSS lokal -->
+  <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap Icons (untuk ikon tombol kembali) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container py-5">
+  <h1 class="text-center mb-5 fw-light">Data Riwayat Penghuni</h1>
+
+  <!-- Tombol Kembali -->
+<div class="mb-5">
+  <a href="index.html" class="btn btn-back px-4 py-2 fw-medium rounded-pill d-inline-flex align-items-center gap-2">
+    <i class="bi bi-arrow-left fs-5"></i>
+    Kembali ke Manajemen Kos
+  </a>
+</div>
+
+  <!-- Tabel Daftar Penghuni Aktif (dipercantik) -->
+  <div class="card shadow border-0 rounded-4 overflow-hidden">
+    <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-semibold">Daftar Seluruh Penghuni Saat Ini</h5>
+      <small class="text-white-75">Data real-time</small>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 custom-table">
+          <thead>
+            <tr>
+              <th scope="col">No</th>
+              <th scope="col">Lokasi Kos</th>
+              <th scope="col">Nomor Kamar</th>
+              <th scope="col">Nama Lengkap</th>
+              <th scope="col">Jumlah Orang</th>
+              <th scope="col">No. HP / WA</th>
+              <th scope="col">Tanggal Masuk</th>
+              <th scope="col">Catatan</th>
+            </tr>
+          </thead>
+          <tbody id="penghuniTableBody">
+            <!-- Data diisi oleh JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="mt-5 py-4 bg-light text-center border-top border-secondary-subtle">
+  <div class="container">
+    <p class="mb-1 text-muted small fw-light">
+      Dibuat oleh anak bungsu
+    </p>
+    <p class="mb-0 text-muted small fw-light">
+      untuk papah ❤️
+    </p>
+  </div>
+</footer>
+
+<!-- Bootstrap JS lokal -->
+<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    onSnapshot,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCnYbNTo5dRdL1czXE1l8-cyUTFUV9gSq8",
+    authDomain: "griyamukti-4ddbc.firebaseapp.com",
+    projectId: "griyamukti-4ddbc",
+    storageBucket: "griyamukti-4ddbc.firebasestorage.app",
+    messagingSenderId: "48662351389",
+    appId: "1:48662351389:web:b51f97d9c1603e26d340f4",
+    measurementId: "G-72825DMNCE"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const roomsCollection = collection(db, "rooms");
+
+  // Fungsi format tanggal
+  function formatDate(dateString) {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  // Fungsi format lokasi
+  function formatKosType(kosType) {
+    return kosType === "griyaMukti" ? "Griya Mukti" : "New Griya Mukti";
+  }
+
+  // Real-time listener
+  onSnapshot(query(roomsCollection, orderBy("createdAt", "desc")), (snapshot) => {
+    const tableBody = document.getElementById("penghuniTableBody");
+    tableBody.innerHTML = "";
+
+    let nomor = 1;
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      const row = `
+        <tr>
+          <td class="fw-medium">${nomor++}</td>
+          <td>${formatKosType(data.kosType)}</td>
+          <td>${data.roomNumber}</td>
+          <td class="fw-medium">${data.name}</td>
+          <td>${data.jumlahPenghuni} Orang</td>
+          <td>${data.phone || "-"}</td>
+          <td>${formatDate(data.checkIn)}</td>
+          <td class="text-muted">${data.notes || "-"}</td>
+        </tr>
+      `;
+      tableBody.innerHTML += row;
+    });
+
+    // Jika kosong
+    if (nomor === 1) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="8" class="text-center py-5 text-muted">
+            <i class="bi bi-exclamation-circle fs-3 d-block mb-2"></i>
+            Belum ada penghuni aktif saat ini.
+          </td>
+        </tr>
+      `;
+    }
+  });
+</script>
+
+</body>
+</html>
