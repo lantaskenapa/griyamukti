@@ -385,3 +385,19 @@ document.getElementById("addModal").addEventListener("hidden.bs.modal", function
   resetModalToAddMode();
   document.getElementById("addForm").reset();
 });
+
+// Taruh ini di paling bawah file, setelah semua fungsi didefinisikan
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('checkout-btn')) {
+    const fullRoomId = e.target.dataset.roomId;
+    const name = e.target.dataset.name;
+
+    if (!fullRoomId || !name) {
+      console.error("Data atribut hilang pada tombol checkout");
+      return;
+    }
+
+    // Panggil fungsi checkout yang sudah ada
+    checkout(fullRoomId, name);
+  }
+});
