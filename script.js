@@ -34,6 +34,39 @@ const historyCollection = collection(db, "history");
 // Daftar nomor kamar per kos
 const roomsGriyaMukti     = Array.from({length: 8},  (_, i) => (i + 1).toString().padStart(2, '0')); // 01-08
 const roomsNewGriyaMukti  = Array.from({length: 10}, (_, i) => (i + 1).toString().padStart(2, '0')); // 01-10
+const totalRooms = {
+  griyaMukti: roomsGriyaMukti.length,     // 8
+  newGriyaMukti: roomsNewGriyaMukti.length // 10
+};
+
+function updateEmptyRoomsDisplay() {
+  let occupiedGriya = 0;
+  let occupiedNew   = 0;
+
+  Object.keys(occupiedRoomsCache).forEach(fullRoomId => {
+    if (fullRoomId.startsWith("griyaMukti-")) occupiedGriya++;
+    if (fullRoomId.startsWith("newGriyaMukti-")) occupiedNew++;
+  });
+
+  const emptyGriya = totalRooms.griyaMukti - occupiedGriya;
+  const emptyNew   = totalRooms.newGriyaMukti - occupiedNew;
+
+  const elGriya = document.getElementById("emptyGriya");
+  const elNew   = document.getElementById("emptyNew");
+
+  if (elGriya) {
+    elGriya.textContent = emptyGriya;
+    elGriya.className = emptyGriya <= 2 ? "text-danger fw-bold" : 
+                        emptyGriya <= 4 ? "text-warning fw-bold" : 
+                        "text-success fw-bold";
+  }
+  if (elNew) {
+    elNew.textContent = emptyNew;
+    elNew.className = emptyNew <= 2 ? "text-danger fw-bold" : 
+                      emptyNew <= 4 ? "text-warning fw-bold" : 
+                      "text-success fw-bold";
+  }
+}
 
 // Variabel global
 let currentKosType = "griyaMukti"; // default
@@ -46,6 +79,8 @@ onSnapshot(roomsCollection, (snapshot) => {
   snapshot.forEach((doc) => {
     occupiedRoomsCache[doc.id] = doc.data();
   });
+
+  updateEmptyRoomsDisplay();
   
   // Panggil ulang populateRoomOptions kalau modal sedang terbuka atau dropdown perlu refresh
   if (document.getElementById("addModal").classList.contains("show")) {
