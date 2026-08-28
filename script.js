@@ -543,11 +543,11 @@ let dueInfo = "";
       accordion.innerHTML += `
         <div class="accordion-item ${isOccupied && headerExtra ? 'border border-warning' : ''}">
           <h2 class="accordion-header" id="heading-${fullRoomId}">
-            <button class="accordion-button ${isOccupied ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${fullRoomId}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${fullRoomId}">
               Kamar ${roomNumber} ${isOccupied ? `- ${roomData.name}` : ''}${headerExtra}
             </button>
           </h2>
-          <div id="collapse-${fullRoomId}" class="accordion-collapse collapse ${isOccupied ? 'show' : ''}" data-bs-parent="#roomAccordion">
+          <div id="collapse-${fullRoomId}" class="accordion-collapse collapse" data-bs-parent="#roomAccordion">
             <div class="accordion-body">${content}</div>
           </div>
         </div>
