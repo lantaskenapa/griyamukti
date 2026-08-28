@@ -386,3 +386,25 @@ footer p {
     width: 100%;
   }
 }
+
+/* ===== Reminder Toast ===== */
+#reminderToastContainer .toast {
+  min-width: 320px;
+  max-width: 380px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+#reminderToastContainer .toast-body {
+  padding: 1rem 1.1rem;
+}
+
+#reminderToastContainer .badge {
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+/* Highlight kamar hampir jatuh tempo di accordion */
+.accordion-item.border-warning {
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.4), 0 6px 20px rgba(0, 0, 0, 0.08) !important;
+}

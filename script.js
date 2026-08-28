@@ -72,6 +72,179 @@ function updateEmptyRoomsDisplay() {
 let currentKosType = "griyaMukti"; // default
 let currentAvailableRooms = roomsGriyaMukti;
 let occupiedRoomsCache = {};
+let notifiedRoomsToday = new Set(); // Cegah notifikasi berulang di sesi yang sama
+
+// ===== Helper: Hitung tanggal jatuh tempo bulanan berikutnya =====
+function getNextDueDate(checkInStr) {
+  if (!checkInStr) return null;
+  const checkIn = new Date(checkInStr + "T00:00:00");
+  if (isNaN(checkIn.getTime())) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const dueDay = checkIn.getDate();
+  let due = new Date(today.getFullYear(), today.getMonth(), dueDay);
+  due.setHours(0, 0, 0, 0);
+
+  // Jika tanggal due sudah lewat bulan ini, ambil bulan depan
+  if (due < today) {
+    due = new Date(today.getFullYear(), today.getMonth() + 1, dueDay);
+  }
+
+  // Handle kasus tanggal tidak valid (misal 31 di bulan Feb)
+  if (due.getDate() !== dueDay) {
+    due = new Date(due.getFullYear(), due.getMonth() + 1, 0); // last day of month
+  }
+
+  return due;
+}
+
+function getDaysUntilDue(checkInStr) {
+  const due = getNextDueDate(checkInStr);
+  if (!due) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffMs = due - today;
+  return Math.round(diffMs / (1000 * 60 * 60 * 24));
+}
+
+function formatDateID(date) {
+  if (!date) return "-";
+  return date.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+}
+
+// ===== Reminder H-3: Popup + Browser Notification =====
+function checkAndShowReminders(roomsData) {
+  const reminders = [];
+
+  Object.keys(roomsData).forEach((fullRoomId) => {
+    const data = roomsData[fullRoomId];
+    if (!data || !data.checkIn) return;
+
+    const daysLeft = getDaysUntilDue(data.checkIn);
+    // H-3: tepat 3 hari sebelum, atau 0–3 hari (mendekati / hari H)
+    if (daysLeft !== null && daysLeft >= 0 && daysLeft <= 3) {
+      const dueDate = getNextDueDate(data.checkIn);
+      reminders.push({
+        fullRoomId,
+        roomNumber: data.roomNumber,
+        name: data.name,
+        kosType: data.kosType,
+        daysLeft,
+        dueDate,
+        phone: data.phone || "-"
+      });
+    }
+  });
+
+  if (reminders.length === 0) return;
+
+  // Filter yang belum pernah dinotifikasi hari ini di sesi ini
+  const newReminders = reminders.filter(r => {
+    const key = `${r.fullRoomId}-${r.dueDate.toISOString().slice(0, 10)}`;
+    if (notifiedRoomsToday.has(key)) return false;
+    notifiedRoomsToday.add(key);
+    return true;
+  });
+
+  if (newReminders.length === 0) return;
+
+  // 1. Tampilkan popup in-app (toast/modal)
+  showReminderPopup(newReminders);
+
+  // 2. Browser Notification (jika izin sudah diberikan)
+  showBrowserNotification(newReminders);
+}
+
+function showReminderPopup(reminders) {
+  // Buat container toast jika belum ada
+  let container = document.getElementById("reminderToastContainer");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "reminderToastContainer";
+    container.className = "toast-container position-fixed top-0 end-0 p-3";
+    container.style.zIndex = "1090";
+    document.body.appendChild(container);
+  }
+
+  reminders.forEach((r, idx) => {
+    const kosName = r.kosType === "griyaMukti" ? "Griya Mukti" : "New Griya Mukti";
+    const statusText =
+      r.daysLeft === 0
+        ? "HARI INI jatuh tempo!"
+        : r.daysLeft === 1
+        ? "Besok jatuh tempo!"
+        : `${r.daysLeft} hari lagi jatuh tempo`;
+
+    const toastId = `reminder-toast-${Date.now()}-${idx}`;
+    const toastHtml = `
+      <div id="${toastId}" class="toast align-items-center text-bg-warning border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+        <div class="d-flex">
+          <div class="toast-body">
+            <div class="fw-bold mb-1">
+              <i class="bi bi-bell-fill me-1"></i> Reminder Jatuh Tempo
+            </div>
+            <div>
+              <strong>${kosName} - Kamar ${r.roomNumber}</strong><br>
+              Penghuni: ${r.name}<br>
+              <span class="badge bg-danger">${statusText}</span>
+              <br><small>Jatuh tempo: ${formatDateID(r.dueDate)}</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    `;
+    container.insertAdjacentHTML("beforeend", toastHtml);
+
+    const toastEl = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastEl, { autohide: false });
+    toast.show();
+
+    // Hapus elemen setelah ditutup
+    toastEl.addEventListener("hidden.bs.toast", () => toastEl.remove());
+  });
+}
+
+function showBrowserNotification(reminders) {
+  if (!("Notification" in window)) return;
+
+  const show = () => {
+    reminders.forEach((r) => {
+      const kosName = r.kosType === "griyaMukti" ? "Griya Mukti" : "New Griya Mukti";
+      const statusText =
+        r.daysLeft === 0
+          ? "HARI INI jatuh tempo!"
+          : r.daysLeft === 1
+          ? "Besok jatuh tempo!"
+          : `${r.daysLeft} hari lagi jatuh tempo`;
+
+      new Notification("Reminder Jatuh Tempo - Griya Mukti", {
+        body: `${kosName} Kamar ${r.roomNumber} (${r.name})\n${statusText}\nJatuh tempo: ${formatDateID(r.dueDate)}`,
+        icon: "asset/logogriyamukti.png",
+        tag: `due-${r.fullRoomId}`, // replace previous for same room
+        requireInteraction: true
+      });
+    });
+  };
+
+  if (Notification.permission === "granted") {
+    show();
+  } else if (Notification.permission !== "denied") {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") show();
+    });
+  }
+}
+
+// Minta izin notifikasi saat halaman dimuat (sekali)
+if ("Notification" in window && Notification.permission === "default") {
+  // Tunda sedikit agar tidak mengganggu load awal
+  setTimeout(() => {
+    Notification.requestPermission();
+  }, 2000);
+}
 
 // Cache global + trigger re-populate dropdown setelah update
 onSnapshot(roomsCollection, (snapshot) => {
@@ -81,7 +254,10 @@ onSnapshot(roomsCollection, (snapshot) => {
   });
 
   updateEmptyRoomsDisplay();
-  
+
+  // Cek reminder H-3
+  checkAndShowReminders(occupiedRoomsCache);
+
   // Panggil ulang populateRoomOptions kalau modal sedang terbuka atau dropdown perlu refresh
   if (document.getElementById("addModal").classList.contains("show")) {
     populateRoomOptions(currentKosType);
@@ -317,18 +493,43 @@ function renderAccordion() {
       const roomData = occupiedRooms[fullRoomId];
       const isOccupied = !!roomData;
 
-let content = isOccupied ? `
+let dueInfo = "";
+      let dueBadge = "";
+      let headerExtra = "";
+      if (isOccupied && roomData.checkIn) {
+        const daysLeft = getDaysUntilDue(roomData.checkIn);
+        const dueDate = getNextDueDate(roomData.checkIn);
+        if (daysLeft !== null && dueDate) {
+          dueInfo = `<p><strong>Jatuh Tempo Berikutnya:</strong> ${formatDateID(dueDate)}</p>`;
+          if (daysLeft === 0) {
+            dueBadge = `<span class="badge bg-danger ms-2">Hari ini jatuh tempo!</span>`;
+            headerExtra = ` <span class="badge bg-danger">H-0</span>`;
+          } else if (daysLeft === 1) {
+            dueBadge = `<span class="badge bg-danger ms-2">Besok jatuh tempo</span>`;
+            headerExtra = ` <span class="badge bg-danger">H-1</span>`;
+          } else if (daysLeft <= 3) {
+            dueBadge = `<span class="badge bg-warning text-dark ms-2">${daysLeft} hari lagi jatuh tempo</span>`;
+            headerExtra = ` <span class="badge bg-warning text-dark">H-${daysLeft}</span>`;
+          } else {
+            dueBadge = `<span class="badge bg-light text-muted ms-2">${daysLeft} hari lagi</span>`;
+          }
+        }
+      }
+
+      let content = isOccupied ? `
   <p><strong>Nama:</strong> ${roomData.name}</p>
   <p><strong>Jumlah Penghuni:</strong> ${roomData.jumlahPenghuni} Orang</p>
   <p><strong>No. HP:</strong> ${roomData.phone || "-"}</p>
   <p><strong>Tanggal Masuk:</strong> ${new Date(roomData.checkIn).toLocaleDateString('id-ID')}</p>
-  ${roomData.notes ? `<p><strong>Catatan:</strong> ${roomData.notes}</p>` : ""}
+  ${dueInfo}
+  ${dueBadge}
+  ${roomData.notes ? `<p class="mt-2"><strong>Catatan:</strong> ${roomData.notes}</p>` : ""}
   <div class="mt-3">
     <button class="btn btn-outline-primary btn-sm rounded-pill me-2" onclick="editPenghuni('${fullRoomId}')">Edit Data</button>
     <button 
       class="btn btn-outline-danger btn-sm rounded-pill checkout-btn"
       data-room-id="${fullRoomId}"
-      data-name="${(roomData.name || '').replace(/"/g, '&quot;')}">  <!-- tambah || '' untuk safety -->
+      data-name="${(roomData.name || '').replace(/"/g, '&quot;')}">
       Checkout
     </button>
   </div>
@@ -340,10 +541,10 @@ let content = isOccupied ? `
 `;
 
       accordion.innerHTML += `
-        <div class="accordion-item">
+        <div class="accordion-item ${isOccupied && headerExtra ? 'border border-warning' : ''}">
           <h2 class="accordion-header" id="heading-${fullRoomId}">
             <button class="accordion-button ${isOccupied ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${fullRoomId}">
-              Kamar ${roomNumber} ${isOccupied ? `- ${roomData.name}` : ''}
+              Kamar ${roomNumber} ${isOccupied ? `- ${roomData.name}` : ''}${headerExtra}
             </button>
           </h2>
           <div id="collapse-${fullRoomId}" class="accordion-collapse collapse ${isOccupied ? 'show' : ''}" data-bs-parent="#roomAccordion">
