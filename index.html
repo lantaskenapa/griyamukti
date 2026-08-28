@@ -42,11 +42,16 @@
 
 <!-- Tombol Tambah Penghuni & Data Riwayat Penghuni (style minimalis modern seperti contoh) -->
 <!-- Tombol Tambah Penghuni & Data Riwayat Penghuni (minimalis modern + ikon sesuai teks) -->
-<div class="d-flex justify-content-end mb-4 gap-3">
+<div class="d-flex justify-content-end mb-4 gap-3 flex-wrap">
   <!-- Tombol Tambah Penghuni -->
   <button class="btn custom-btn add-btn" data-bs-toggle="modal" data-bs-target="#addModal">
     <i class="bi bi-plus-circle-fill me-2"></i> Tambah Penghuni
   </button>
+
+  <!-- Tombol Pendapatan Bulanan -->
+  <a href="pendapatan.html" class="btn custom-btn income-btn">
+    <i class="bi bi-cash-stack me-2"></i> Pendapatan Bulanan
+  </a>
 
   <!-- Tombol Data Riwayat Penghuni -->
   <a href="riwayat.html" class="btn custom-btn history-btn">
@@ -136,6 +141,10 @@
           <div class="mb-3">
             <label class="form-label">Tanggal Masuk</label>
             <input type="date" class="form-control" id="checkIn" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Harga Kos / Bulan (Rp)</label>
+            <input type="number" class="form-control" id="harga" min="0" step="1000" placeholder="Contoh: 850000" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Catatan (opsional)</label>

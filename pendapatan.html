@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pendapatan Bulanan - Griya Mukti</title>
+  
+  <!-- Bootstrap CSS lokal -->
+  <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container py-5">
+  <h1 class="text-center mb-5 fw-light">Pendapatan Bulanan</h1>
+
+  <!-- Tombol Kembali -->
+  <div class="mb-5">
+    <a href="index.html" class="btn btn-back px-4 py-2 fw-medium rounded-pill d-inline-flex align-items-center gap-2">
+      <i class="bi bi-arrow-left fs-5"></i>
+      Kembali ke Manajemen Kos
+    </a>
+  </div>
+
+  <!-- Ringkasan Pendapatan -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card income-summary-card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body text-center p-4">
+          <div class="income-icon mb-3">
+            <i class="bi bi-wallet2"></i>
+          </div>
+          <small class="text-muted d-block mb-1">Total Pendapatan / Bulan</small>
+          <h3 class="fw-semibold text-success mb-0" id="totalPendapatan">Rp 0</h3>
+          <small class="text-muted" id="totalKamarAktif">0 kamar terisi</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card income-summary-card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body text-center p-4">
+          <div class="income-icon mb-3 income-icon-griya">
+            <i class="bi bi-building"></i>
+          </div>
+          <small class="text-muted d-block mb-1">Griya Mukti</small>
+          <h3 class="fw-semibold text-primary mb-0" id="pendapatanGriya">Rp 0</h3>
+          <small class="text-muted" id="kamarGriya">0 kamar</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card income-summary-card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body text-center p-4">
+          <div class="income-icon mb-3 income-icon-new">
+            <i class="bi bi-buildings"></i>
+          </div>
+          <small class="text-muted d-block mb-1">New Griya Mukti</small>
+          <h3 class="fw-semibold text-primary mb-0" id="pendapatanNew">Rp 0</h3>
+          <small class="text-muted" id="kamarNew">0 kamar</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabel Detail -->
+  <div class="card shadow border-0 rounded-4 overflow-hidden">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+      <h5 class="mb-0 fw-semibold text-muted">
+        <i class="bi bi-list-ul me-2"></i>Rincian Pendapatan per Kamar
+      </h5>
+      <small class="text-muted">Data real-time dari penghuni aktif</small>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 custom-table">
+          <thead>
+            <tr>
+              <th scope="col">No</th>
+              <th scope="col">Lokasi Kos</th>
+              <th scope="col">Nomor Kamar</th>
+              <th scope="col">Nama Penghuni</th>
+              <th scope="col">Tanggal Masuk</th>
+              <th scope="col">Harga / Bulan</th>
+            </tr>
+          </thead>
+          <tbody id="pendapatanTableBody">
+            <!-- Diisi oleh JS -->
+          </tbody>
+          <tfoot>
+            <tr class="table-light fw-semibold">
+              <td colspan="5" class="text-end pe-3">Total</td>
+              <td id="footerTotal">Rp 0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-muted small text-center mt-4 mb-0">
+    <i class="bi bi-info-circle me-1"></i>
+    Pendapatan dihitung dari harga kos semua penghuni yang masih aktif (per bulan).
+  </p>
+</div>
+
+<!-- Footer -->
+<footer class="mt-5 py-4 bg-light text-center border-top border-secondary-subtle">
+  <div class="container">
+    <p class="mb-1 text-muted small fw-light">
+      Dibuat oleh anak bungsu
+    </p>
+    <p class="mb-0 text-muted small fw-light">
+      untuk papah ❤️
+    </p>
+  </div>
+</footer>
+
+<!-- Bootstrap JS lokal -->
+<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    onSnapshot,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCnYbNTo5dRdL1czXE1l8-cyUTFUV9gSq8",
+    authDomain: "griyamukti-4ddbc.firebaseapp.com",
+    projectId: "griyamukti-4ddbc",
+    storageBucket: "griyamukti-4ddbc.firebasestorage.app",
+    messagingSenderId: "48662351389",
+    appId: "1:48662351389:web:b51f97d9c1603e26d340f4",
+    measurementId: "G-72825DMNCE"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const roomsCollection = collection(db, "rooms");
+
+  function formatRp(num) {
+    if (num == null || isNaN(num)) return "Rp 0";
+    return "Rp " + Number(num).toLocaleString("id-ID");
+  }
+
+  function formatDate(dateString) {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+  }
+
+  function formatKosType(kosType) {
+    return kosType === "griyaMukti" ? "Griya Mukti" : "New Griya Mukti";
+  }
+
+  onSnapshot(query(roomsCollection, orderBy("createdAt", "desc")), (snapshot) => {
+    const tableBody = document.getElementById("pendapatanTableBody");
+    tableBody.innerHTML = "";
+
+    let total = 0;
+    let totalGriya = 0;
+    let totalNew = 0;
+    let countGriya = 0;
+    let countNew = 0;
+    let nomor = 1;
+
+    const rows = [];
+
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const harga = data.harga != null ? Number(data.harga) : 0;
+      total += harga;
+
+      if (data.kosType === "griyaMukti") {
+        totalGriya += harga;
+        countGriya++;
+      } else {
+        totalNew += harga;
+        countNew++;
+      }
+
+      rows.push({
+        kosType: data.kosType || "",
+        roomNumber: data.roomNumber != null ? String(data.roomNumber) : "",
+        name: data.name,
+        checkIn: data.checkIn,
+        harga
+      });
+    });
+
+    // Urutkan: lokasi lalu nomor kamar (aman jika data kosong)
+    rows.sort((a, b) => {
+      const ka = a.kosType || "";
+      const kb = b.kosType || "";
+      if (ka !== kb) return ka.localeCompare(kb);
+      return String(a.roomNumber || "").localeCompare(String(b.roomNumber || ""), undefined, { numeric: true });
+    });
+
+    rows.forEach((r) => {
+      tableBody.innerHTML += `
+        <tr>
+          <td class="fw-medium">${nomor++}</td>
+          <td>${formatKosType(r.kosType)}</td>
+          <td>${r.roomNumber}</td>
+          <td class="fw-medium">${r.name || "-"}</td>
+          <td>${formatDate(r.checkIn)}</td>
+          <td class="fw-semibold text-success">${formatRp(r.harga)}</td>
+        </tr>
+      `;
+    });
+
+    if (nomor === 1) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center py-5 text-muted">
+            <i class="bi bi-exclamation-circle fs-3 d-block mb-2"></i>
+            Belum ada penghuni aktif. Pendapatan Rp 0.
+          </td>
+        </tr>
+      `;
+    }
+
+    document.getElementById("totalPendapatan").textContent = formatRp(total);
+    document.getElementById("totalKamarAktif").textContent = `${rows.length} kamar terisi`;
+    document.getElementById("pendapatanGriya").textContent = formatRp(totalGriya);
+    document.getElementById("kamarGriya").textContent = `${countGriya} kamar`;
+    document.getElementById("pendapatanNew").textContent = formatRp(totalNew);
+    document.getElementById("kamarNew").textContent = `${countNew} kamar`;
+    document.getElementById("footerTotal").textContent = formatRp(total);
+  });
+</script>
+
+</body>
+</html>

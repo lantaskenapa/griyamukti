@@ -50,6 +50,7 @@
               <th scope="col">Jumlah Orang</th>
               <th scope="col">No. HP / WA</th>
               <th scope="col">Tanggal Masuk</th>
+              <th scope="col">Harga / Bulan</th>
               <th scope="col">Catatan</th>
             </tr>
           </thead>
@@ -124,6 +125,10 @@
     snapshot.forEach((doc) => {
       const data = doc.data();
 
+      const hargaText = data.harga != null
+        ? "Rp " + Number(data.harga).toLocaleString("id-ID")
+        : "-";
+
       const row = `
         <tr>
           <td class="fw-medium">${nomor++}</td>
@@ -133,6 +138,7 @@
           <td>${data.jumlahPenghuni} Orang</td>
           <td>${data.phone || "-"}</td>
           <td>${formatDate(data.checkIn)}</td>
+          <td class="fw-semibold text-success">${hargaText}</td>
           <td class="text-muted">${data.notes || "-"}</td>
         </tr>
       `;
@@ -143,7 +149,7 @@
     if (nomor === 1) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="8" class="text-center py-5 text-muted">
+          <td colspan="9" class="text-center py-5 text-muted">
             <i class="bi bi-exclamation-circle fs-3 d-block mb-2"></i>
             Belum ada penghuni aktif saat ini.
           </td>

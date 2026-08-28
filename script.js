@@ -340,6 +340,7 @@ function resetModalToAddMode() {
   document.getElementById("phone").value = "";
   document.getElementById("jumlahPenghuni").value = "1";
   document.getElementById("checkIn").value = "";
+  document.getElementById("harga").value = "";
   document.getElementById("notes").value = "";
 }
 
@@ -369,10 +370,13 @@ document.getElementById("addForm").addEventListener("submit", async (e) => {
   const phone = document.getElementById("phone").value.trim();
   const jumlahPenghuni = document.getElementById("jumlahPenghuni").value;
   const checkIn = document.getElementById("checkIn").value;
+  const hargaRaw = document.getElementById("harga").value;
   const notes = document.getElementById("notes").value.trim();
 
-  if (!roomNumber || !name || !checkIn || !jumlahPenghuni) {
-    alert("Mohon isi semua field yang wajib!");
+  const harga = parseInt(hargaRaw, 10);
+
+  if (!roomNumber || !name || !checkIn || !jumlahPenghuni || isNaN(harga) || harga < 0) {
+    alert("Mohon isi semua field yang wajib (termasuk Harga Kos)!");
     return;
   }
 
@@ -395,6 +399,7 @@ document.getElementById("addForm").addEventListener("submit", async (e) => {
       phone,
       jumlahPenghuni: parseInt(jumlahPenghuni),
       checkIn,
+      harga,
       notes,
       kosType: location,
       createdAt: serverTimestamp()
@@ -455,6 +460,7 @@ window.editPenghuni = function(fullRoomId) {
       document.getElementById("phone").value = data.phone || "";
       document.getElementById("jumlahPenghuni").value = data.jumlahPenghuni || "1";
       document.getElementById("checkIn").value = data.checkIn || "";
+      document.getElementById("harga").value = data.harga != null ? data.harga : "";
       document.getElementById("notes").value = data.notes || "";
 
       document.getElementById("addModalLabel").textContent = `Edit Penghuni Kamar ${roomNumber}`;
@@ -471,29 +477,43 @@ window.editPenghuni = function(fullRoomId) {
   });
 };
 
-// Render accordion (tetap)
+// Render accordion — simpan unsubscribe agar tidak double listener
+let unsubscribeAccordion = null;
+
 function renderAccordion() {
   const accordion = document.getElementById("roomAccordion");
   if (!accordion) return;
 
+  // Matikan listener lama supaya tidak double / looping
+  if (typeof unsubscribeAccordion === "function") {
+    unsubscribeAccordion();
+    unsubscribeAccordion = null;
+  }
+
   accordion.innerHTML = "";
 
-  const q = query(roomsCollection, where("kosType", "==", currentKosType));
+  const kosType = currentKosType;
+  const roomsList = [...getAvailableRooms(kosType)].sort((a, b) =>
+    a.localeCompare(b, undefined, { numeric: true })
+  );
 
-  onSnapshot(q, (snapshot) => {
+  const q = query(roomsCollection, where("kosType", "==", kosType));
+
+  unsubscribeAccordion = onSnapshot(q, (snapshot) => {
     const occupiedRooms = {};
-    snapshot.forEach((doc) => {
-      occupiedRooms[doc.id] = doc.data();
+    snapshot.forEach((docSnap) => {
+      occupiedRooms[docSnap.id] = docSnap.data();
     });
 
-    currentAvailableRooms.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    // Bangun HTML sekali, lalu set — hindari append berulang
+    let html = "";
 
-    currentAvailableRooms.forEach(roomNumber => {
-      const fullRoomId = getFullRoomId(currentKosType, roomNumber);
+    roomsList.forEach((roomNumber) => {
+      const fullRoomId = getFullRoomId(kosType, roomNumber);
       const roomData = occupiedRooms[fullRoomId];
       const isOccupied = !!roomData;
 
-let dueInfo = "";
+      let dueInfo = "";
       let dueBadge = "";
       let headerExtra = "";
       if (isOccupied && roomData.checkIn) {
@@ -516,11 +536,18 @@ let dueInfo = "";
         }
       }
 
-      let content = isOccupied ? `
+      let content;
+      if (isOccupied) {
+        const hargaText = roomData.harga != null
+          ? `Rp ${Number(roomData.harga).toLocaleString("id-ID")}`
+          : "-";
+
+        content = `
   <p><strong>Nama:</strong> ${roomData.name}</p>
   <p><strong>Jumlah Penghuni:</strong> ${roomData.jumlahPenghuni} Orang</p>
   <p><strong>No. HP:</strong> ${roomData.phone || "-"}</p>
   <p><strong>Tanggal Masuk:</strong> ${new Date(roomData.checkIn).toLocaleDateString('id-ID')}</p>
+  <p><strong>Harga Kos:</strong> ${hargaText} / bulan</p>
   ${dueInfo}
   ${dueBadge}
   ${roomData.notes ? `<p class="mt-2"><strong>Catatan:</strong> ${roomData.notes}</p>` : ""}
@@ -533,14 +560,17 @@ let dueInfo = "";
       Checkout
     </button>
   </div>
-` : `
+`;
+      } else {
+        content = `
   <div class="text-center py-4">
     <span class="badge bg-secondary mb-3 px-4 py-2">KOSONG</span>
     <button class="btn btn-primary btn-add rounded-pill px-4 py-2" onclick="preselectRoom('${roomNumber}')">+ Tambah Penghuni</button>
   </div>
 `;
+      }
 
-      accordion.innerHTML += `
+      html += `
         <div class="accordion-item ${isOccupied && headerExtra ? 'border border-warning' : ''}">
           <h2 class="accordion-header" id="heading-${fullRoomId}">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${fullRoomId}">
@@ -553,6 +583,8 @@ let dueInfo = "";
         </div>
       `;
     });
+
+    accordion.innerHTML = html;
   });
 }
 
@@ -572,6 +604,7 @@ window.checkout = async function(fullRoomId, name) {
       phone: data.phone,
       jumlahPenghuni: data.jumlahPenghuni,
       checkIn: data.checkIn,
+      harga: data.harga != null ? data.harga : null,
       notes: data.notes,
       kosType: data.kosType,
       roomId: fullRoomId,
